@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -14,30 +15,27 @@ public class MailMapper implements RowMapper<Mail> {
 
     @Override
     public Mail mapRow(ResultSet resultSet, int i) throws SQLException {
-        Mail mail = new Mail();
-        mail.setMailId(resultSet.getLong(1));
-        mail.setRecipientsId(Arrays.stream(resultSet.getString(3)
-                .split(","))
-                .map(Long::parseLong)
-                .collect(Collectors.toList()));
-        mail.setSubject(resultSet.getString(4));
-        mail.setText(resultSet.getString(5));
-        mail.setDateMail(resultSet.getTimestamp(6));
-        mail.setReplyMailId(resultSet.getLong(7));
-
-        User user = new User();
-        user.setUserId(resultSet.getLong(8));
-        user.setLogin(resultSet.getString(9));
-        user.setPassword(resultSet.getString(10));
-        user.setFirstName(resultSet.getString(11));
-        user.setLastName(resultSet.getString(12));
-        user.setMiddleName(resultSet.getString(13));
-        user.setUserRole(Arrays.stream(resultSet.getString(14)
+        User author = new User();
+        author.setUserId(resultSet.getLong(7));
+        author.setLogin(resultSet.getString(8));
+        author.setPassword(resultSet.getString(9));
+        author.setFirstName(resultSet.getString(10));
+        author.setLastName(resultSet.getString(11));
+        author.setMiddleName(resultSet.getString(12));
+        author.setUserRole(Arrays.stream(resultSet.getString(13)
                 .split(","))
                 .map(Role::valueOf)
                 .collect(Collectors.toSet()));
 
-        mail.setAuthor(user);
+        Mail mail = new Mail();
+        mail.setMailId(resultSet.getLong(1));
+        mail.setAuthor(author);
+        mail.setRecipients(resultSet.getString(14));
+        mail.setSubject(resultSet.getString(3));
+        mail.setText(resultSet.getString(4));
+        mail.setDateMail(resultSet.getTimestamp(5));
+        mail.setReplyMailId(resultSet.getLong(6));
+
         return mail;
     }
 }

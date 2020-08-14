@@ -1,20 +1,19 @@
 package com.varusometr.webmail.entity;
 
 import java.util.Date;
-import java.util.List;
 
 public class Mail {
     private Long mailId;
     private User author;
-    private List<Long> recipientsId;
+    private String recipients;
     private String subject;
     private String text;
     private Date dateMail;
     private Long replyMailId;
 
-    public Mail(User author, List<Long> recipientsId, String subject, String text, Date dateMail, Long replyMailId) {
+    public Mail(User author, String recipients, String subject, String text, Date dateMail, Long replyMailId) {
         this.author = author;
-        this.recipientsId = recipientsId;
+        this.recipients = recipients;
         this.subject = subject;
         this.text = text;
         this.dateMail = dateMail;
@@ -24,9 +23,9 @@ public class Mail {
     public Mail() {
     }
 
-    public Mail(User author, List<Long> recipientsId, String subject, String text, Date dateMail) {
+    public Mail(User author, String recipients, String subject, String text, Date dateMail) {
         this.author = author;
-        this.recipientsId = recipientsId;
+        this.recipients = recipients;
         this.subject = subject;
         this.text = text;
         this.dateMail = dateMail;
@@ -56,12 +55,12 @@ public class Mail {
         this.author = author;
     }
 
-    public List<Long> getRecipientsId() {
-        return recipientsId;
+    public String getRecipients() {
+        return recipients;
     }
 
-    public void setRecipientsId(List<Long> recipientsId) {
-        this.recipientsId = recipientsId;
+    public void setRecipients(String recipients) {
+        this.recipients = recipients;
     }
 
     public String getSubject() {

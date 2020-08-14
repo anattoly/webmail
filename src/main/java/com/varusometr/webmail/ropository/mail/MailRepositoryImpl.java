@@ -1,6 +1,7 @@
 package com.varusometr.webmail.ropository.mail;
 
 import com.varusometr.webmail.entity.Mail;
+import com.varusometr.webmail.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -44,8 +45,7 @@ public class MailRepositoryImpl implements MailRepository {
     @Override
     public void createMail(Mail mail) {
         jdbcTemplate.update(qCreateMail,
-                mail.getAuthor(),
-                mail.getRecipientsId(),
+                mail.getAuthor().getUserId(),
                 mail.getSubject(),
                 mail.getText(),
                 mail.getDateMail());
@@ -57,20 +57,20 @@ public class MailRepositoryImpl implements MailRepository {
     }
 
     @Override
-    public Mail findMailById(Long id) {
-        return jdbcTemplate.queryForObject(qfindById, new Object[]{id}, new MailMapper());
+    public Mail findMailById(Long userId, Long mailId) {
+        return jdbcTemplate.queryForObject(qfindById, new Object[]{userId, mailId}, new MailMapper());
     }
 
     @Override
-    public Page<Mail> findAll(int page, int size) {
+    public Page<Mail> findAll(int page, int size, Long userId) {
 
-        return pagination(page, size, jdbcTemplate.query(qfindAll, new MailMapper()));
+        return pagination(page, size, jdbcTemplate.query(qfindAll, new MailMapper(), userId));
     }
 
     @Override
-    public Page<Mail> findAllBySomeParam(int page, int size, String keyword) {
+    public Page<Mail> findAllBySomeParam(int page, int size, String keyword, Long userId) {
 
-        return pagination(page, size, jdbcTemplate.query(qfindAllBySomeParam, new MailMapper(), keyword));
+        return pagination(page, size, jdbcTemplate.query(qfindAllBySomeParam, new MailMapper(), keyword, userId));
     }
 
     private Page<Mail> pagination(int page, int size, List<Mail> list) {

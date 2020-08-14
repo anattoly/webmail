@@ -19,7 +19,7 @@
 
                 $.get(href, function (mail, status) {
                     $('.reply_email #email_subject').val(mail.subject);
-                    $('.reply_email #email_author').val(mail.author);
+                    $('.reply_email #email_recipients').val(mail.recipients);
                     $('.reply_email #email_text').val(mail.text);
                 });
                 $('.reply_email #view_email').modal();
@@ -41,11 +41,11 @@
             $("#delete_selected").on('click', function (e) {
                 var mails = [];
                 $(".checkItem:checked").each(function () {
-                    mails.push($(this).data('mailIdList'));
+                    mails.push($(this).data('mail_id'));
                 });
                 var WRN_PROFILE_DELETE;
                 if (mails.length <= 0) {
-                    alert("Please select records.");
+                    alert("Пожалуйста, выберете необходимые для удаления письма.");
                 } else {
                     WRN_PROFILE_DELETE = "Удалить " + (mails.length > 1 ? "выбранные " + mails.length + " писем?" : "выбранное " + mails.length + " письмо?");
                     var checked = confirm(WRN_PROFILE_DELETE);
@@ -53,9 +53,9 @@
                         var selected_values = mails.join(",");
                         $.ajax({
                             type: "DELETE",
-                            url: "/api/mails/delete",
+                            url: "/api/mail/",
                             cache: false,
-                            data: 'mailIdList=' + selected_values,
+                            data: 'mail_id=' + selected_values,
                             success: function (response) {
                                 // remove deleted mails rows
                                 var mail_ids = response.split(",");
@@ -86,14 +86,21 @@
                             <h2 class="grid-title"><i class="fa fa-inbox"></i> Почта</h2>
                             <a class="btn btn-block btn-primary" data-toggle="modal" data-target="#compose-modal"><i
                                     class="fa fa-pencil"></i>&nbsp;&nbsp;Написать</a>
+
+                            <hr>
+
                             <div>
                                 <ul class="nav nav-pills nav-stacked">
                                     <li class="header">Папки</li>
-                                    <li class="active"><a href="/api/mails"><i class="fa fa-inbox"> Входящие</i></a>
-                                    </li>
+                                    <li><a href="#"><i class="fa fa-inbox"> Входящие</i></a></li>
                                     <li><a href="#"><i class="fa fa-star"></i> Помеченные</a></li>
                                     <li><a href="#"><i class="fa fa-bookmark"></i> Важные</a></li>
-                                    <li><a href="#"><i class="fa fa-mail-forward"></i> Отправленные</a></li>
+                                    <li th:class="${#httpServletRequest.requestURI == '/api/mails'
+                                                    || #httpServletRequest.requestURI + '?page=' + currentPage == '/api/mails?page=' + currentPage
+                                                    ? 'active'
+                                                    : ''}">
+                                        <a href="/api/mails"><i class="fa fa-mail-forward"></i> Отправленные</a>
+                                    </li>
                                     <li><a href="#"><i class="fa fa-folder"></i> Спам</a></li>
                                 </ul>
                             </div>
@@ -147,9 +154,9 @@
                                         <td class="action"><input type="checkbox" class="checkItem"/></td>
                                         <td class="action"><i class="fa fa-star-o"></i></td>
                                         <td class="action"><i class="fa fa-bookmark"></i></td>
-                                        <td class="name" th:text="${mail.getAuthor().getUsername()} ?: ${mail.getAuthor().getUserFullName()}"><a href="#"></a></td>
+                                        <td class="name" th:text="'Кому: ' + ${mail.recipients}"><a href="#"></a></td>
                                         <td class="mail_subject" th:text="${mail.subject}"
-                                            th:href="@{/api/mail (id=${mail.mailId})}">
+                                            th:href="@{/api/mail (mailId=${mail.mailId})}">
 
                                         </td>
                                         <td class="datetime" th:text="${#dates.format(mail.dateMail, 'yyyyMMdd')
@@ -162,8 +169,7 @@
                                     </tbody>
                                 </table>
                                 <div class="reply_email">
-                                    <form action="#" th:action="@{/api/mail/}"
-                                          method="post">
+                                    <form>
                                         <div class="modal fade" id="view_email" tabindex="-1"
                                              role="dialog" aria-hidden="true">
                                             <div class="modal-wrapper">
@@ -174,22 +180,21 @@
                                                                     aria-hidden="true">
                                                                 ×
                                                             </button>
-                                                            <h6 class="form-group">
-                                                                <a id="email_subject"
-                                                                   th:text="${email.subject}">
-                                                                </a><i class="fa fa-envelope"></i></h6>
+                                                            <h6 class="form-group"><i class="fa fa-envelope"></i></h6>
                                                         </div>
                                                         <div class="modal-body">
                                                             <div class="form-group">
-                                                                <input name="author" type="text" class="form-control"
-                                                                       id="email_author" placeholder="От"
-                                                                       th:text="${email.author}"/>
+                                                                <b><input name="subject" type="text" class="form-control"
+                                                                       id="email_subject" placeholder="Тема"/></b>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <input name="recipients" type="text" class="form-control"
+                                                                       id="email_recipients" placeholder="Кому"/>
                                                             </div>
                                                             <div class="form-group">
                                                                 <textarea name="text" type="text" class="form-control"
                                                                           id="email_text" placeholder="Текст"
-                                                                          style="height: 120px;"
-                                                                          th:text="${email.text}"></textarea>
+                                                                          style="height: 120px;"></textarea>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-default"
@@ -216,9 +221,9 @@
                                                                      ? currentPage
                                                                      : currentPage - 1})}">«</a>
                                 </li>
-                                <li th:each="i :${#numbers.sequence(0, data.totalPages - 1)}">
-                                    <a th:href="@{/api/mails (page=${i})}" th:text="${i + 1}"
-                                       th:classappend="${currentPage} == ${i} ? 'active' : ''"></a>
+                                <li th:each="i :${#numbers.sequence(0, data.totalPages - 1)}"
+                                    th:class="${currentPage} == ${i} ? 'active' : ''">
+                                    <a th:href="@{/api/mails (page=${i})}" th:text="${i + 1}"></a>
                                 </li>
                                 <li><a th:href="@{/api/mails (page=${currentPage == (data.totalPages - 1)
                                                                       ? currentPage

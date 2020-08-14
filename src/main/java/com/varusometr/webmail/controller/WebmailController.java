@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -33,21 +32,24 @@ public class WebmailController {
         model.addAttribute("userData", userRepository.findAll(page, 5));
         model.addAttribute("currentPage", page);
 
+
         return "users";
     }
 
     @GetMapping("/mails")
-    public String getMails(Model model, @RequestParam(defaultValue = "0") int page) {
-        model.addAttribute("data", mailRepository.findAll(page, 20));
+    public String getMails(Model model,
+                           @AuthenticationPrincipal User user,
+                           @RequestParam(defaultValue = "0") int page) {
+        model.addAttribute("data", mailRepository.findAll(page, 20, user.getUserId()));
         model.addAttribute("currentPage", page);
-        model.addAttribute("email", new Mail());
+
 
         return "index";
     }
 
     @PostMapping("/mail")
     @ResponseBody
-    public Mail createMail(@RequestParam List<Long> recipientsId,
+    public Mail createMail(@RequestParam String recipientsId,
                              @AuthenticationPrincipal User author,
                              @RequestParam String subject,
                              @RequestParam String text) {
@@ -66,10 +68,8 @@ public class WebmailController {
                            @RequestParam String subject,
                            @RequestParam String text) {
 
-        Long recipientId = mailRepository.findMailById(mail_id).getAuthor().getUserId();
-        List<Long> recipientsId = new ArrayList<>();
-        recipientsId.add(recipientId);
-        Mail mail = new Mail(author, recipientsId, subject, text, new Date(), mail_id);
+        String recipients = mailRepository.findMailById(author.getUserId(), mail_id).getRecipients();
+        Mail mail = new Mail(author, recipients, subject, text, new Date(), mail_id);
         mailRepository.createMail(mail);
 
 
@@ -78,8 +78,8 @@ public class WebmailController {
 
     @GetMapping("/mail")
     @ResponseBody
-    public Mail findMail(Model model, Long id) {
-        Mail email = mailRepository.findMailById(id);
+    public Mail findMail(Model model, @AuthenticationPrincipal User user, Long mailId ) {
+        Mail email = mailRepository.findMailById(user.getUserId(), mailId);
         model.addAttribute("email", email);
 
         return email;
@@ -87,9 +87,10 @@ public class WebmailController {
 
     @GetMapping("/results")
     public String getSearchMail(Model model,
+                                @AuthenticationPrincipal User user,
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "") String search_query) {
-        model.addAttribute("data", mailRepository.findAllBySomeParam(page, 20, "%" + search_query + "%"));
+        model.addAttribute("data", mailRepository.findAllBySomeParam(page, 20, "%" + search_query + "%", user.getUserId()));
         model.addAttribute("currentPage", page);
 
         return "index";
