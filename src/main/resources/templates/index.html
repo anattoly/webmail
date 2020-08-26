@@ -18,8 +18,8 @@
                 var href = $(this).attr('href');
 
                 $.get(href, function (mail, status) {
-                    $('.reply_email #email_subject').val(mail.subject);
-                    $('.reply_email #email_recipients').val(mail.recipients);
+                    $('.reply_email #email_subject').text(' ' + mail.subject);
+                    $('.reply_email #email_recipients').text(mail.recipients);
                     $('.reply_email #email_text').val(mail.text);
                 });
                 $('.reply_email #view_email').modal();
@@ -60,7 +60,7 @@
                                 // remove deleted mails rows
                                 var mail_ids = response.split(",");
                                 for (var i = 0; i < mail_ids.length; i++) {
-                                    $("#" + mail_ids[i]).remove();
+                                    $("" + mail_ids[i]).remove();
                                 }
                             }
                         });
@@ -77,7 +77,7 @@
 <div class="container">
     <div class="row">
         <!-- BEGIN INBOX -->
-        <div class="col-md-12">
+        <div class="col-md-15">
             <div class="grid email">
                 <div class="grid-body">
                     <div class="row">
@@ -122,7 +122,8 @@
                                             <li><a href="#">Пометить как важное</a></li>
                                             <li class="divider"></li>
                                             <li><a href="#">Отправить в спам</a></li>
-                                            <li id="delete_selected"><a href="#">Удалить
+                                            <li id="delete_selected">
+                                                <a href="#">Удалить
                                                 <span class="rows_selected" id="select_count"> 0 </span>
                                                 отмеченных</a>
                                             </li>
@@ -130,7 +131,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 search-form">
+                                <div class="col-md-4 search-form">
                                     <form th:action="@{/api/results}" class="text-right">
                                         <div class="input-group">
                                             <input type="text" name="search_query" class="form-control input-sm"
@@ -144,7 +145,7 @@
                                 </div>
                             </div>
 
-                            <div class="table-responsive">
+                            <div class="table-mails">
                                 <table class="table">
                                     <tr>
                                         <th><input type="checkbox" id="checkAll"></th>
@@ -180,16 +181,11 @@
                                                                     aria-hidden="true">
                                                                 ×
                                                             </button>
-                                                            <h6 class="form-group"><i class="fa fa-envelope"></i></h6>
+                                                            <i class="fa fa-envelope"><b class="modal-title" id="email_subject"> Тема</b></i>
                                                         </div>
                                                         <div class="modal-body">
                                                             <div class="form-group">
-                                                                <b><input name="subject" type="text" class="form-control"
-                                                                       id="email_subject" placeholder="Тема"/></b>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <input name="recipients" type="text" class="form-control"
-                                                                       id="email_recipients" placeholder="Кому"/>
+                                                                <b type="text" id="email_recipients"> Кому</b>
                                                             </div>
                                                             <div class="form-group">
                                                                 <textarea name="text" type="text" class="form-control"

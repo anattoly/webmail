@@ -104,5 +104,4 @@ public class WebmailController {
                 .status(HttpStatus.OK)
                 .body("Mail by id " + mail_id + "was deleted");
     }
-
 }

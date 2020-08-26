@@ -3,11 +3,29 @@ package com.varusometr.webmail.entity;
 public class Inbox {
     private User recipient;
     private Mail inboxMail;
+    private User author;
     private boolean isRead;
     private boolean isStared;
     private boolean isImportant;
 
     public Inbox() {
+    }
+
+    public Inbox(User recipient, Mail inboxMail, User author, boolean isRead, boolean isStared, boolean isImportant) {
+        this.recipient = recipient;
+        this.inboxMail = inboxMail;
+        this.author = author;
+        this.isRead = isRead;
+        this.isStared = isStared;
+        this.isImportant = isImportant;
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
     }
 
     public User getRecipient() {
